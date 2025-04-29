@@ -3,6 +3,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { sensorDataModel } from "../db/models.mjs";
 import {isAdmin} from "../middleware/auth.mjs";
+import nodemailer from "nodemailer";
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.post("/wifi-data" ,async (req, res) => {
     try {
         newEntry.save();
         console.log("Data saved to database");
+        console.log(newEntry);
         res.sendStatus(200);
     } catch (error) {
         console.log(error);
@@ -78,12 +80,37 @@ router.post("/admin-logout", isAdmin, async (req, res) => {
 router.post("/send-alert", isAdmin, async (req, res) => {
     let data = req.body;
     console.log("message: ", data.message);
+
     const token = req.cookies.token;
     if (!token) return res.status(401).send('No token found');
-    jwt.verify(token, secret, (err, decoded) => {
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) return res.status(403).send('Invalid token');
         console.log("Token : ", decoded);
-        // Add logic to send alert to the device using smtp
+
+        let transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        let mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: "biswassubhajit009@gmail.com",
+            subject: "Device Alert",
+            text: data.message
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log("Email sent successfully");
+            res.send({ status: "success", message: "Alert sent to email" });
+        } catch (error) {
+            console.error("Error sending email:", error);
+            res.status(500).send("Failed to send email");
+        }
     });
 });
 
@@ -92,6 +119,18 @@ router.get("/", async (req, res) => {
     res.send("Hello World!");
 });
 
-
+router.get("/getdata", async (req, res) => {
+    try {
+      const latestData = await sensorDataModel.find({})
+        .sort({ time: -1 })
+        .limit(5);
+        console.log("oye hoye");
+        console.log(latestData);
+      res.status(200).json(latestData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      res.status(500).send("Internal Server Error");
+    }
+});
 
 export default router;

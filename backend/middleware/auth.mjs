@@ -1,5 +1,5 @@
 import { mongo } from "mongoose";
-import { userDataModel, erickDataModel, deviceDataModel } from "../db/models.mjs";
+import { userDataModel } from "../db/models.mjs";
 import jwt from "jsonwebtoken";
 
 
