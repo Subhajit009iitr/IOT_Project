@@ -1,17 +1,17 @@
 // src/Dashboard.js
-import React, { useState, useEffect, useRef } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect, useRef } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-import WebSocketService from './websocket';
-import { removeToken } from './auth';
+import WebSocketService from "./websocket";
+import { removeToken } from "./auth";
 
 const Dashboard = ({ onLogout }) => {
   const [dataRows, setDataRows] = useState([]);
   const [alerts, setAlerts] = useState([]);
-  const [manualAlertMsg, setManualAlertMsg] = useState('');
+  const [manualAlertMsg, setManualAlertMsg] = useState("");
   const socketService = useRef(null);
 
-  const WEBSOCKET_URL = 'ws://localhost:5000/ws'; // change to your backend URL
+  const WEBSOCKET_URL = "ws://localhost:5000/ws"; // change to your backend URL
 
   const handleData = (data) => {
     setDataRows((prev) => [...prev, data]);
@@ -22,7 +22,11 @@ const Dashboard = ({ onLogout }) => {
   };
 
   useEffect(() => {
-    socketService.current = new WebSocketService(WEBSOCKET_URL, handleData, handleAlert);
+    socketService.current = new WebSocketService(
+      WEBSOCKET_URL,
+      handleData,
+      handleAlert
+    );
     socketService.current.connect();
 
     return () => {
@@ -33,7 +37,7 @@ const Dashboard = ({ onLogout }) => {
   const handleManualAlert = () => {
     if (manualAlertMsg.trim() && socketService.current) {
       socketService.current.sendAlert(manualAlertMsg.trim());
-      setManualAlertMsg('');
+      setManualAlertMsg("");
     }
   };
 
@@ -46,7 +50,9 @@ const Dashboard = ({ onLogout }) => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center">
         <h2>Sensor Dashboard</h2>
-        <button className="btn btn-outline-danger" onClick={logout}>Logout</button>
+        <button className="btn btn-outline-danger" onClick={logout}>
+          Logout
+        </button>
       </div>
 
       {alerts.length > 0 && (
@@ -76,21 +82,35 @@ const Dashboard = ({ onLogout }) => {
       <table className="table table-bordered table-striped">
         <thead className="table-dark">
           <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Temperature (°C)</th>
-            <th>Altitude (m)</th>
-            <th>Pressure (hPa)</th>
+            <th>Timestamp</th>
+            <th>Temp (°C)</th>
+            <th>Alt (m)</th>
+            <th>Pres (hPa)</th>
+            <th>Lat</th>
+            <th>Lng</th>
+            <th>ax</th>
+            <th>ay</th>
+            <th>az</th>
+            <th>gx</th>
+            <th>gy</th>
+            <th>gz</th>
           </tr>
         </thead>
         <tbody>
-          {dataRows.map((entry, index) => (
-            <tr key={index}>
-              <td>{entry.date}</td>
-              <td>{entry.time}</td>
-              <td>{entry.temperature}</td>
-              <td>{entry.altitude}</td>
-              <td>{entry.pressure}</td>
+          {dataRows.map((row, i) => (
+            <tr key={i}>
+              <td>{new Date(row.timestamp).toLocaleString()}</td>
+              <td>{row.temp?.toFixed(2)}</td>
+              <td>{row.alt?.toFixed(2)}</td>
+              <td>{row.pres?.toFixed(2)}</td>
+              <td>{row.lat?.toFixed(4)}</td>
+              <td>{row.lng?.toFixed(4)}</td>
+              <td>{row.ax}</td>
+              <td>{row.ay}</td>
+              <td>{row.az}</td>
+              <td>{row.gx}</td>
+              <td>{row.gy}</td>
+              <td>{row.gz}</td>
             </tr>
           ))}
         </tbody>
