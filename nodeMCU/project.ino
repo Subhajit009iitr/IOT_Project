@@ -90,10 +90,10 @@ void sendDataToScript() {
   HTTPClient http;
   http.begin(client, webAppUrl);
   http.addHeader("Content-Type", "application/json");
-
+  http.addHeader("bypass-tunnel-reminder", "true");
   sprintf(iot_payload, "{\"bmp\": %s, \"mpu\": %s, \"gps\": %s}", bmp_data, mpu_data, gps_data);
 
-  Serial.printf("📤 Payload: %s\n", iot_payload);
+  Serial.printf("Payload: %s\n", iot_payload);
 
   // Convert char array to String before POST
   int httpCode = http.POST(String(iot_payload));
