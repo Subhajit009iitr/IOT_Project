@@ -6,6 +6,7 @@ function checkGeoLocation(data) {
     if(lat > 0 && lat < 90 && lon > 0 && lon < 180) {
         return null;
     } else {
+        console.log("Geo location alert");
         return "Geo location alert";
     }
 }
@@ -32,10 +33,12 @@ function checkStats(data) {
     }
 
     if(maxPressure - minPressure > 100) {
+        console.log("Pressure alert");
         return "Pressure alert";
     }
 
     if(maxTemperature - minTemperature > 5) {
+        console.log("Temperature alert");
         return "Temperature alert";
     }
 
@@ -53,12 +56,14 @@ function checkGyro(data) {
     for(let i = 0; i < data.length; i++) {
         if(Math.abs(data[i].ax - ax) > 10){
             console.log("Gyro alert");
+            return "Gyro alert";
         }
         // if(Math.abs(data[i].ay - ay) > 10){
         //     console.log("Gyro alert");
         // }
         if(Math.abs(data[i].az - az) > 10){
             console.log("Gyro alert");
+            return "Gyro alert";
         }
         // if(Math.abs(data[i].gx - gx) > 10){
         //     console.log("Gyro alert");
@@ -73,9 +78,9 @@ function checkGyro(data) {
 }
 
 function checkAlert(data){
-
-    // checkGeoLocation(data);
-    // checkStats(data);
+    checkGeoLocation(data);
+    checkStats(data);
+    checkGyro(data);
 }
 
 export default checkAlert;
