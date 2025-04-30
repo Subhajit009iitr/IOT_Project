@@ -19,7 +19,6 @@ const sensorData = new Schema({
 });
 
 const userData = new Schema({
-    name: String,
     email: String,
     password: String,
 }, {

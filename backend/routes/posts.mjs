@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { sensorDataModel } from "../db/models.mjs";
 import {isAdmin} from "../middleware/auth.mjs";
 import nodemailer from "nodemailer";
+import checkAlert from "../alert.mjs";
 
 const router = express.Router();
 
@@ -12,15 +13,29 @@ const isValidEmail = (email) => {
     return regex.test(email);
 };
 
+const isRequiredData = (data) => {
+    // if(!data.gps || !data.gps.lat || !data.gps.lon || !data.gps.alt){
+    //     return false;
+    // }
+    if(!data.bmp || !data.bmp.temp || !data.bmp.pres){
+        return false;
+    }
+    if(!data.mpu || !data.mpu.ax || !data.mpu.ay || !data.mpu.az || !data.mpu.gx || !data.mpu.gy || !data.mpu.gz){
+        return false;
+    }
+    return true;
+}
+
 router.post("/wifi-data" ,async (req, res) => {
     console.log("triggered wifi-data");
     let data = req.body;
     data.time = new Date();
+    // isRequiredData(data);
 
     let newEntry = new sensorDataModel({
         device_id: "device_1",
         lat: data.gps.lat,
-        lon: data.gps.lon,
+        lon: data.gps.lng,
         alt: data.gps.alt,
         temperature: data.bmp.temp,
         pressure: data.bmp.pres,
@@ -44,7 +59,7 @@ router.post("/wifi-data" ,async (req, res) => {
     }
 });
 
-router.post("/admin-login",isAdmin, async (req, res) => {
+router.post("/admin-login", async (req, res) => {
     let data = req.body;
     // sanity check
     if(!data.email || !data.password || !data.name || !isValidEmail(data.email)) {
@@ -88,29 +103,29 @@ router.post("/send-alert", isAdmin, async (req, res) => {
         if (err) return res.status(403).send('Invalid token');
         console.log("Token : ", decoded);
 
-        let transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
+        // let transporter = nodemailer.createTransport({
+        //     service: "gmail",
+        //     auth: {
+        //         user: process.env.EMAIL_USER,
+        //         pass: process.env.EMAIL_PASS
+        //     }
+        // });
 
-        let mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: "biswassubhajit009@gmail.com",
-            subject: "Device Alert",
-            text: data.message
-        };
+        // let mailOptions = {
+        //     from: process.env.EMAIL_USER,
+        //     to: "biswassubhajit009@gmail.com",
+        //     subject: "Device Alert",
+        //     text: data.message
+        // };
 
-        try {
-            await transporter.sendMail(mailOptions);
-            console.log("Email sent successfully");
-            res.send({ status: "success", message: "Alert sent to email" });
-        } catch (error) {
-            console.error("Error sending email:", error);
-            res.status(500).send("Failed to send email");
-        }
+        // try {
+        //     await transporter.sendMail(mailOptions);
+        //     console.log("Email sent successfully");
+        //     res.send({ status: "success", message: "Alert sent to email" });
+        // } catch (error) {
+        //     console.error("Error sending email:", error);
+        //     res.status(500).send("Failed to send email");
+        // }
     });
 });
 
@@ -121,11 +136,11 @@ router.get("/", async (req, res) => {
 
 router.get("/getdata", async (req, res) => {
     try {
-      const latestData = await sensorDataModel.find({})
+        const latestData = await sensorDataModel.find({})
         .sort({ time: -1 })
         .limit(5);
-        console.log("oye hoye");
         console.log(latestData);
+        checkAlert(latestData);
       res.status(200).json(latestData);
     } catch (error) {
       console.error("Error fetching data:", error);
