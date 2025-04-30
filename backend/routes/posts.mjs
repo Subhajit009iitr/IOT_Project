@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import express from "express";
 import jwt from "jsonwebtoken";
-import { sensorDataModel } from "../db/models.mjs";
+import { sensorDataModel, userDataModel } from "../db/models.mjs";
 import {isAdmin} from "../middleware/auth.mjs";
 import nodemailer from "nodemailer";
 import checkAlert from "../alert.mjs";
@@ -62,7 +62,10 @@ router.post("/wifi-data" ,async (req, res) => {
 router.post("/admin-login", async (req, res) => {
     let data = req.body;
     // sanity check
-    if(!data.email || !data.password || !data.name || !isValidEmail(data.email)) {
+    console.log(data);
+    console.log(data.email, data.password);
+    if(!data.email || !data.password ) {
+        console.log("triggered admin-login");
         res.send("invalid data")
         res.sendStatus(403);
         return;
@@ -70,15 +73,14 @@ router.post("/admin-login", async (req, res) => {
     let user = await userDataModel.findOne({email: data.email});
     if(user) {
         if(user.password == data.password) {
-            if(!req.headers.cookie?.split("token=")[1]) {
-                // generate token
-                const token = jwt.sign({email: user.email}, process.env.JWT_SECRET);
-                res.cookie("token", token, {
-                    httpOnly: true,
-                    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-                })
-            }
-            res.send({status: "success"});
+            console.log("triggered admin-login2", user);
+            const token = jwt.sign({email: user.email}, process.env.JWT_SECRET);
+            res.cookie("token", token, {
+                httpOnly: true,
+                maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            })
+            
+            res.send({status: "success", token: token});
         } else {
             res.sendStatus(403);
         }

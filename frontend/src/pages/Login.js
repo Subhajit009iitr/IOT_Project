@@ -12,10 +12,16 @@ const Login = ({ onLoginSuccess }) => {
     e.preventDefault();
     setErr("");
     try {
-      const res = await axios.post("http://localhost:5000/api/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:8000/admin-login",
+        {
+          email: email,
+          password: password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       saveToken(res.data.token);
       onLoginSuccess(); // redirect to dashboard
     } catch (error) {
