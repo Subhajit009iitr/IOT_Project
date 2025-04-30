@@ -3,7 +3,7 @@ import express from "express";
 function checkGeoLocation(data) {
     let lat = data.at(-1).lat;
     let lon = data.at(-1).lon;
-    if(lat > 0 && lat < 90 && lon > 0 && lon < 180) {
+    if(lat > 25.50 && lat < 30.50 && lon > 75 && lon < 80) {
         return null;
     } else {
         console.log("Geo location alert");
@@ -77,10 +77,20 @@ function checkGyro(data) {
     }
 }
 
-function checkAlert(data){
-    checkGeoLocation(data);
-    checkStats(data);
-    checkGyro(data);
+function checkAlert(data) {
+    let geo = checkGeoLocation(data);
+    let stat = checkStats(data);
+    let gyro = checkGyro(data);
+  
+    let alerts = [];
+  
+    if (geo) alerts.push(geo);
+    if (stat) alerts.push(stat);
+    if (gyro) alerts.push(gyro);
+  
+    if (alerts.length === 0) return null;
+  
+    return alerts.join(" and ");
 }
 
 export default checkAlert;

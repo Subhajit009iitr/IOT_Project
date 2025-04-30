@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import { WebSocketServer } from "ws";
 import { sensorDataModel } from "./db/models.mjs";
 import jwt from "jsonwebtoken";
+import checkAlert from "./alert.mjs";
+import fetch from "node-fetch";
 
 const PORT = process.env.PORT || 4000;
 const app = express();
@@ -51,15 +53,29 @@ wss.on("connection", async function connection(ws, req) {
   const interval = setInterval(async () => {
     try {
       const latestData = await sensorDataModel.find({}).sort({ time: -1 }).limit(10);
-      // console.log("latestData: ", latestData);
+      let alert = checkAlert(latestData);
+      // let alert = "Hehe test alert";
+  
+      if (alert != null) {
+        console.log("Alert triggered: ", alert);
+        try {
+          await fetch(`http://localhost:${PORT}/send-alert`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Cookie: req.headers.cookie || "",
+            },
+            body: JSON.stringify({ message: alert }),
+          });
+        } catch (err) {
+          console.error("Error sending alert via API:", err);
+        }
+      }
+  
       ws.send(JSON.stringify({ type: "data", payload: latestData }));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   }, 5000);
-
-  ws.on("close", () => {
-    console.log("WebSocket client disconnected");
-    clearInterval(interval);
-  });
+  
 });

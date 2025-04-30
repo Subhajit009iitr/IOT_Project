@@ -119,7 +119,7 @@ router.post("/send-alert", isAdmin, async (req, res) => {
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) return res.status(403).send('Invalid token');
         const alertPayload = JSON.stringify({
-          Auth: "327d9d71f503e6083c8989bf20425c40cea6ad77f5809d2e160d06f4ab55078d",
+          Auth: process.env.AUTH_SMTP,
           Subject: "Alert",
           To: "s_biswas@cs.iitr.ac.in",
           Content: data.message || "Default message from server",
@@ -135,18 +135,5 @@ router.get("/", async (req, res) => {
     res.send("Hello World!");
 });
 
-router.get("/getdata", async (req, res) => {
-    try {
-        const latestData = await sensorDataModel.find({})
-        .sort({ time: -1 })
-        .limit(5);
-        // console.log(latestData);
-        checkAlert(latestData);
-      res.status(200).json(latestData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      res.status(500).send("Internal Server Error");
-    }
-});
 
 export default router;
