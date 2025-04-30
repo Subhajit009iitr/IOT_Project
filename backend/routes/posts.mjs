@@ -26,6 +26,24 @@ const isRequiredData = (data) => {
     return true;
 }
 
+function sendAlertViaSocket(payload) {
+    const client = new net.Socket();
+  
+    client.connect(4010, "3.108.63.6", () => {
+      console.log("Connected to alert socket server !!!");
+      client.write(payload);
+      client.end();
+    });
+  
+    client.on("error", (err) => {
+      console.error("Socket connection error:", err.message);
+    });
+  
+    client.on("close", () => {
+      console.log("Connection closed");
+    });
+}
+
 router.post("/wifi-data" ,async (req, res) => {
     console.log("triggered wifi-data");
     let data = req.body;
@@ -103,31 +121,15 @@ router.post("/send-alert", isAdmin, async (req, res) => {
 
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) return res.status(403).send('Invalid token');
-        console.log("Token : ", decoded);
-
-        // let transporter = nodemailer.createTransport({
-        //     service: "gmail",
-        //     auth: {
-        //         user: process.env.EMAIL_USER,
-        //         pass: process.env.EMAIL_PASS
-        //     }
-        // });
-
-        // let mailOptions = {
-        //     from: process.env.EMAIL_USER,
-        //     to: "biswassubhajit009@gmail.com",
-        //     subject: "Device Alert",
-        //     text: data.message
-        // };
-
-        // try {
-        //     await transporter.sendMail(mailOptions);
-        //     console.log("Email sent successfully");
-        //     res.send({ status: "success", message: "Alert sent to email" });
-        // } catch (error) {
-        //     console.error("Error sending email:", error);
-        //     res.status(500).send("Failed to send email");
-        // }
+        const alertPayload = JSON.stringify({
+          Auth: "327d9d71f503e6083c8989bf20425c40cea6ad77f5809d2e160d06f4ab55078d",
+          Subject: "Alert",
+          To: "s_biswas@cs.iitr.ac.in",
+          Content: data.message || "Default message from server",
+        });
+      
+        sendAlertViaSocket(alertPayload);
+        res.send({ status: "alert sent attempt made" });
     });
 });
 
