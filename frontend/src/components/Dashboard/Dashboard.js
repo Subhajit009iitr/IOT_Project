@@ -4,12 +4,15 @@ import { removeToken } from "../../utils/auth";
 import "bootstrap/dist/css/bootstrap.min.css";
 import DataTable from "./DataTable"; 
 import axios from "axios";
+import MapComponent from "../map/Mapcomponent";
 
 // import "./Dashboard.css"; // optional styling
 
 const Dashboard = ({ onLogout }) => {
   const [dataRows, setDataRows] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [lat, setLat] = useState(29.863935870872957); // Default latitude
+  const [lon, setLon] = useState(77.8957097806369); // Default longitude
   const [manualAlertMsg, setManualAlertMsg] = useState("");
   const socketService = useRef(null);
 
@@ -19,6 +22,9 @@ const Dashboard = ({ onLogout }) => {
   const handleData = (data) => {
     console.log("Received data:", data); // Debugging line
     setDataRows(data); // Keep only the last 10 rows
+    const latestdata = data[0];
+    setLat(latestdata.lat?latestdata.lat:29.863935870872957); // Update latitude from data
+    setLon(latestdata.lon?latestdata.lon:77.8957097806369); // Update longitude from data
   };
 
   const handleAlert = (alertMessage) => {
@@ -117,6 +123,7 @@ const Dashboard = ({ onLogout }) => {
       </div>
 
       <DataTable dataRows={dataRows} />
+      <MapComponent lat={lat} lon={lon} />
     </div>
   );
 };
