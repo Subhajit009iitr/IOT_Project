@@ -10,7 +10,7 @@
 // BMP280 setup
 Adafruit_BMP280 bmp;
 char iot_payload[0x100];
-char mpu_data[0x40];
+char mpu_data[0x80];
 char gps_data[0x40];
 char bmp_data[0x40];
 MPU6050 mpu(0x69);
@@ -24,9 +24,12 @@ SoftwareSerial gpsSerial(RXPin, TXPin);
 // WiFi details
 const char* ssid = "SmartJeet";
 const char* password = "ProjectP";
-const char* webAppUrl = "http://3.108.63.6:8000/wifi-data/";
+// const char* webAppUrl = "http://3.108.63.6:8000/wifi-data";
+const char* webAppUrl = " http://metal-lions-build.loca.lt/wifi-data";
+const char* testUrl = " http://metal-lions-build.loca.lt/getdata";
 
-WiFiClientSecure client;
+WiFiClient client;
+HTTPClient http;
 
 // Function to send data to Server
 void sendDataToScript();
@@ -50,7 +53,6 @@ void setup() {
     delay(1000);
     Serial.println("Connecting to WiFi...");
   }
-  client.setInsecure();
 
   Serial.println("🌡️ BMP280 Sensor Init...");
   if (!bmp.begin(0x76)) {
@@ -78,25 +80,42 @@ void loop() {
   getMpuData();
   getGpsData();
   Serial.println("Data collected.");
-  Serial.println(bmp_data);
-  Serial.println(mpu_data);
-  Serial.println(gps_data);
+  Serial.printf("%s\n", bmp_data);
+  Serial.printf("%s\n", gps_data);
+  Serial.printf("%s\n", mpu_data);
 
   sendDataToScript();
-  delay(500);
+  delay(1000);
 }
 
 void sendDataToScript() {
-  HTTPClient http;
+
   http.begin(client, webAppUrl);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("bypass-tunnel-reminder", "true");
   sprintf(iot_payload, "{\"bmp\": %s, \"mpu\": %s, \"gps\": %s}", bmp_data, mpu_data, gps_data);
+  int httpCode = http.POST(iot_payload);
+  Serial.printf("code : %d\n", httpCode);
+  if (httpCode > 0) {
+    Serial.print("Server response: ");
+    Serial.println(httpCode);
+  } else {
+    Serial.print("HTTP Post failed: ");
+    Serial.println(httpCode);
+    http.begin(client, testUrl);
+    httpCode = http.GET();
+    Serial.println(httpCode);
+    // Serial.print("GET response code: ");
+    // Serial.println(httpCode);
 
-  Serial.printf("Payload: %s\n", iot_payload);
-
-  // Convert char array to String before POST
-  int httpCode = http.POST(String(iot_payload));
+    // if (httpCode > 0) {
+    //   String payload = http.getString();  // Fetch GET response content
+    //   Serial.println("GET response body:");
+    //   Serial.println(payload);
+    // } else {
+    //   Serial.println("GET request failed too.");
+    // }
+  }
 
   Serial.print("Response code: ");
   Serial.println(httpCode);
