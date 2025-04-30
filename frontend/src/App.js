@@ -1,8 +1,8 @@
 // src/App.js
-import React, { useState, useEffect } from 'react';
-import Login from './Login';
-import Dashboard from './Dashboard';
-import { isAuthenticated } from './auth';
+import React, { useState, useEffect } from "react";
+import Login from "./pages/Login";
+import Dashboard from "./components/Dashboard/Dashboard";
+import { isAuthenticated } from "./utils/auth";
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -19,5 +19,3 @@ const App = () => {
 };
 
 export default App;
-
-

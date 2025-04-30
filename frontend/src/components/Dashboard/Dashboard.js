@@ -1,9 +1,9 @@
-// src/Dashboard.js
 import React, { useState, useEffect, useRef } from "react";
+import WebSocketService from "../../utils/websocket";
+import { removeToken } from "../../utils/auth";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-import WebSocketService from "./websocket";
-import { removeToken } from "./auth";
+import DataTable from "./DataTable"; // assuming DataTable is in the same directory
+// import "./Dashboard.css"; // optional styling
 
 const Dashboard = ({ onLogout }) => {
   const [dataRows, setDataRows] = useState([]);
@@ -11,7 +11,7 @@ const Dashboard = ({ onLogout }) => {
   const [manualAlertMsg, setManualAlertMsg] = useState("");
   const socketService = useRef(null);
 
-  const WEBSOCKET_URL = "ws://localhost:5000/ws"; // change to your backend URL
+  const WEBSOCKET_URL = "ws://localhost:5000/ws";
 
   const handleData = (data) => {
     setDataRows((prev) => [...prev, data]);
@@ -35,7 +35,7 @@ const Dashboard = ({ onLogout }) => {
   }, []);
 
   const handleManualAlert = () => {
-    if (manualAlertMsg.trim() && socketService.current) {
+    if (manualAlertMsg.trim()) {
       socketService.current.sendAlert(manualAlertMsg.trim());
       setManualAlertMsg("");
     }
@@ -54,6 +54,7 @@ const Dashboard = ({ onLogout }) => {
           Logout
         </button>
       </div>
+      {/* Header, alerts, input, and table rendering as before */}
 
       {alerts.length > 0 && (
         <div className="alert alert-warning mt-3">
@@ -79,42 +80,7 @@ const Dashboard = ({ onLogout }) => {
         </button>
       </div>
 
-      <table className="table table-bordered table-striped">
-        <thead className="table-dark">
-          <tr>
-            <th>Timestamp</th>
-            <th>Temp (°C)</th>
-            <th>Alt (m)</th>
-            <th>Pres (hPa)</th>
-            <th>Lat</th>
-            <th>Lng</th>
-            <th>ax</th>
-            <th>ay</th>
-            <th>az</th>
-            <th>gx</th>
-            <th>gy</th>
-            <th>gz</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataRows.map((row, i) => (
-            <tr key={i}>
-              <td>{new Date(row.timestamp).toLocaleString()}</td>
-              <td>{row.temp?.toFixed(2)}</td>
-              <td>{row.alt?.toFixed(2)}</td>
-              <td>{row.pres?.toFixed(2)}</td>
-              <td>{row.lat?.toFixed(4)}</td>
-              <td>{row.lng?.toFixed(4)}</td>
-              <td>{row.ax}</td>
-              <td>{row.ay}</td>
-              <td>{row.az}</td>
-              <td>{row.gx}</td>
-              <td>{row.gy}</td>
-              <td>{row.gz}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <DataTable dataRows={dataRows} />
     </div>
   );
 };
