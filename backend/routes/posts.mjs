@@ -67,7 +67,7 @@ router.post("/admin-login", async (req, res) => {
         res.sendStatus(403);
         return;
     }
-
+    let user = await userDataModel.findOne({email: data.email});
     if(user) {
         if(user.password == data.password) {
             if(!req.headers.cookie?.split("token=")[1]) {
