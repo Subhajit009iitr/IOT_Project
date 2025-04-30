@@ -69,7 +69,6 @@ router.post("/wifi-data" ,async (req, res) => {
     try {
         newEntry.save();
         console.log("Data saved to database");
-        console.log(newEntry);
         res.sendStatus(200);
     } catch (error) {
         console.log(error);
@@ -80,8 +79,6 @@ router.post("/wifi-data" ,async (req, res) => {
 router.post("/admin-login", async (req, res) => {
     let data = req.body;
     // sanity check
-    console.log(data);
-    console.log(data.email, data.password);
     if(!data.email || !data.password ) {
         console.log("triggered admin-login");
         res.send("invalid data")
@@ -115,7 +112,6 @@ router.post("/admin-logout", isAdmin, async (req, res) => {
 router.post("/send-alert", isAdmin, async (req, res) => {
     console.log("triggered send-alert");
     let data = req.body;
-    console.log("message: ", data.message);
 
     const token = req.cookies.token;
     if (!token) return res.status(401).send('No token found');
@@ -144,7 +140,7 @@ router.get("/getdata", async (req, res) => {
         const latestData = await sensorDataModel.find({})
         .sort({ time: -1 })
         .limit(5);
-        console.log(latestData);
+        // console.log(latestData);
         checkAlert(latestData);
       res.status(200).json(latestData);
     } catch (error) {
