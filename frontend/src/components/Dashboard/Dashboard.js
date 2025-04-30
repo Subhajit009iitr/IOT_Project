@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import WebSocketService from "../../utils/websocket";
 import { removeToken } from "../../utils/auth";
 import "bootstrap/dist/css/bootstrap.min.css";
-import DataTable from "./DataTable"; // assuming DataTable is in the same directory
+import DataTable from "./DataTable"; 
+import axios from "axios";
+
 // import "./Dashboard.css"; // optional styling
 
 const Dashboard = ({ onLogout }) => {
@@ -34,10 +36,26 @@ const Dashboard = ({ onLogout }) => {
     };
   }, []);
 
-  const handleManualAlert = () => {
+  const handleManualAlert = async() => {
     if (manualAlertMsg.trim()) {
-      socketService.current.sendAlert(manualAlertMsg.trim());
-      setManualAlertMsg("");
+      try {
+        let message = manualAlertMsg.trim();
+        const res = await axios.post(
+          "http://localhost:8000/send-alert",
+          { message },
+          {
+            withCredentials: true, // ensures the token cookie is sent
+          }
+        );
+    
+        if (res.data.status === "alert sent attempt made") {
+          console.log("Alert sent successfully.");
+        } else {
+          console.warn("Alert not acknowledged properly.");
+        }
+      } catch (error) {
+        console.error("Failed to send alert:", error.response?.data || error.message);
+      }
     }
   };
 

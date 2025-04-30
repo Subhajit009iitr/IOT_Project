@@ -5,6 +5,7 @@ import { sensorDataModel, userDataModel } from "../db/models.mjs";
 import {isAdmin} from "../middleware/auth.mjs";
 import nodemailer from "nodemailer";
 import checkAlert from "../alert.mjs";
+import net from "net";
 
 const router = express.Router();
 
@@ -113,6 +114,7 @@ router.post("/admin-logout", isAdmin, async (req, res) => {
 });
 
 router.post("/send-alert", isAdmin, async (req, res) => {
+    console.log("triggered send-alert");
     let data = req.body;
     console.log("message: ", data.message);
 
