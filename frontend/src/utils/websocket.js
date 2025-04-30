@@ -46,55 +46,99 @@
 
 
 
-  // websocket.js
+//   // websocket.js
+// class WebSocketService {
+//   constructor(url, onData, onAlert) {
+//     this.url = url;
+//     this.socket = null;
+//     this.onData = onData;
+//     this.onAlert = onAlert;
+//   }
+
+//   connect() {
+//     this.socket = new WebSocket(this.url);
+
+//     // WebSocket opened
+//     this.socket.onopen = () => {
+//       console.log('WebSocket connected');
+//     };
+
+//     // Handle incoming messages
+//     this.socket.onmessage = (event) => {
+//       const message = JSON.parse(event.data);
+
+//       if (message.type === 'data') {
+//         this.onData(message.payload);  // Pass data to the callback
+//       } else if (message.type === 'alert') {
+//         this.onAlert(message.payload); // Pass alert to the callback
+//       }
+//     };
+
+//     // Handle WebSocket errors
+//     this.socket.onerror = (error) => {
+//       console.error('WebSocket Error:', error);
+//     };
+
+//     // WebSocket closed
+//     this.socket.onclose = () => {
+//       console.log('WebSocket connection closed');
+//     };
+//   }
+
+//   // Send message to the backend (manual alert)
+//   sendAlert(message) {
+//     const alertMessage = JSON.stringify({
+//       type: 'alert',
+//       payload: message,
+//     });
+//     this.socket.send(alertMessage);
+//   }
+
+//   // Close the WebSocket connection
+//   disconnect() {
+//     if (this.socket) {
+//       this.socket.close();
+//     }
+//   }
+// }
+
+// export default WebSocketService;
+
 class WebSocketService {
-  constructor(url, onData, onAlert) {
-    this.url = url;
-    this.socket = null;
+  constructor(url, token, onData, onAlert) {
+    // Append the token as a query parameter to the WebSocket URL
+    this.url = `${url}?token=${token}`;  // Adding the token as a query param
     this.onData = onData;
     this.onAlert = onAlert;
+    this.socket = null;
   }
 
   connect() {
     this.socket = new WebSocket(this.url);
 
-    // WebSocket opened
     this.socket.onopen = () => {
-      console.log('WebSocket connected');
+      console.log("WebSocket connected");
     };
 
-    // Handle incoming messages
     this.socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
+      if (message.error) {
+        console.error("Auth failed:", message.error);
+        return;
+      }
 
-      if (message.type === 'data') {
-        this.onData(message.payload);  // Pass data to the callback
-      } else if (message.type === 'alert') {
-        this.onAlert(message.payload); // Pass alert to the callback
+      if (message.type === "data") {
+        this.onData(message.payload);
+      } else if (message.type === "alert") {
+        this.onAlert(message.payload);
       }
     };
 
-    // Handle WebSocket errors
-    this.socket.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
-
-    // WebSocket closed
     this.socket.onclose = () => {
-      console.log('WebSocket connection closed');
+      console.log("WebSocket disconnected");
     };
   }
 
-  // Send message to the backend (manual alert)
-  sendAlert(message) {
-    const alertMessage = JSON.stringify({
-      type: 'alert',
-      payload: message,
-    });
-    this.socket.send(alertMessage);
-  }
-
-  // Close the WebSocket connection
   disconnect() {
     if (this.socket) {
       this.socket.close();

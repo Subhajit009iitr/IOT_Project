@@ -5,6 +5,8 @@ import posts from "./routes/posts.mjs";
 import cookieParser from "cookie-parser";
 import { WebSocketServer } from "ws";
 import { sensorDataModel } from "./db/models.mjs";
+import jwt from "jsonwebtoken";
+
 
 const PORT = process.env.PORT || 4000;
 const app = express();
@@ -47,13 +49,21 @@ async function fetchData() {
 
 wss.on("connection", async function connection(ws, req) {
   console.log("WebSocket client connected");
-  const cookies = cookie.parse(req.headers.cookie || '');
-  const token = cookies.token;
+  // const cookies = cookie.parse(req.headers.cookie || '');
+  // const token = cookies.token;
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const token = url.searchParams.get("token");
   let user;
   try {
     if (!token) throw new Error('No token found');
-    user = jwt.verify(token, JWT_SECRET);
+    user = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("WebSocket client connected2");
   } catch (err) {
+    // console.log("WebSocket client connected3");
+    // console.log(process.env.JWT_SECRET);
+    console.log(token);
+    console.log("error in token verification: ", err);
+
     ws.send(JSON.stringify({ error: 'Authentication failed' }));
     ws.close();
     return;

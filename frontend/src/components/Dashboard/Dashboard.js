@@ -13,7 +13,7 @@ const Dashboard = ({ onLogout }) => {
   const [manualAlertMsg, setManualAlertMsg] = useState("");
   const socketService = useRef(null);
 
-  const WEBSOCKET_URL = "ws://localhost:5000/ws";
+  const WEBSOCKET_URL = "ws://localhost:8000/ws";
 
   const handleData = (data) => {
     setDataRows((prev) => [...prev, data]);
@@ -24,8 +24,11 @@ const Dashboard = ({ onLogout }) => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("jwt_token");
+    console.log("Token from localStorage:", token); // Debugging line
     socketService.current = new WebSocketService(
       WEBSOCKET_URL,
+      token,
       handleData,
       handleAlert
     );
@@ -35,6 +38,19 @@ const Dashboard = ({ onLogout }) => {
       socketService.current.disconnect();
     };
   }, []);
+
+  // useEffect(() => {
+  //   const socketService = new WebSocketService(
+  //     WEBSOCKET_URL, // or wss://yourdomain.com if using SSL
+  //     handleData,
+  //     handleAlert
+  //   );
+  //   socketService.connect();
+  
+  //   return () => {
+  //     socketService.disconnect();
+  //   };
+  // }, []);
 
   const handleManualAlert = async() => {
     if (manualAlertMsg.trim()) {
