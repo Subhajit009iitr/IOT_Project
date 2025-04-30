@@ -14,9 +14,11 @@ const Dashboard = ({ onLogout }) => {
   const socketService = useRef(null);
 
   const WEBSOCKET_URL = "ws://localhost:8000/ws";
+  console.log(dataRows)
 
   const handleData = (data) => {
-    setDataRows((prev) => [...prev, data]);
+    console.log("Received data:", data); // Debugging line
+    setDataRows(data); // Keep only the last 10 rows
   };
 
   const handleAlert = (alertMessage) => {

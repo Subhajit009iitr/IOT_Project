@@ -4,7 +4,7 @@
 //       this.onMessage = onMessage;
 //       this.start();
 //     }
-  
+
 //     start() {
 //       // Simulated stream of data every 3 seconds
 //       setInterval(() => {
@@ -20,7 +20,7 @@
 //         });
 //         this.onMessage({ data: dataPacket });
 //       }, 3000);
-  
+
 //       // Random alert every 10 seconds (auto alert)
 //       setInterval(() => {
 //         const alert = JSON.stringify({
@@ -30,7 +30,7 @@
 //         this.onMessage({ data: alert });
 //       }, 10000);
 //     }
-  
+
 //     send(message) {
 //       // Manual alert simulation
 //       const alert = JSON.stringify({
@@ -40,11 +40,8 @@
 //       this.onMessage({ data: alert });
 //     }
 //   }
-  
+
 //   export default WebSocketMock;
-  
-
-
 
 //   // websocket.js
 // class WebSocketService {
@@ -107,7 +104,8 @@
 class WebSocketService {
   constructor(url, token, onData, onAlert) {
     // Append the token as a query parameter to the WebSocket URL
-    this.url = `${url}?token=${token}`;  // Adding the token as a query param
+    // this.url = `${url}?token=${token}`;  // Adding the token as a query param
+    this.url = `${url}`; // Adding the token as a query param
     this.onData = onData;
     this.onAlert = onAlert;
     this.socket = null;

@@ -51,6 +51,7 @@ wss.on("connection", async function connection(ws, req) {
   const interval = setInterval(async () => {
     try {
       const latestData = await sensorDataModel.find({}).sort({ time: -1 }).limit(10);
+      // console.log("latestData: ", latestData);
       ws.send(JSON.stringify({ type: "data", payload: latestData }));
     } catch (error) {
       console.error("Error fetching data:", error);
