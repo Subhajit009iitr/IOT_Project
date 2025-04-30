@@ -3,8 +3,8 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { sensorDataModel, userDataModel } from "../db/models.mjs";
 import {isAdmin} from "../middleware/auth.mjs";
-import nodemailer from "nodemailer";
 import checkAlert from "../alert.mjs";
+import net from "net";
 
 const router = express.Router();
 

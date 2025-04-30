@@ -3,7 +3,6 @@ import cors from "cors";
 import "./loadEnvironment.mjs";
 import posts from "./routes/posts.mjs";
 import cookieParser from "cookie-parser";
-import mongoose from "mongoose";
 import { WebSocketServer } from "ws";
 import { sensorDataModel } from "./db/models.mjs";
 
